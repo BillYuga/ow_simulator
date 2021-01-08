@@ -18,6 +18,11 @@ FaultInjector::FaultInjector(ros::NodeHandle node_handle)
   m_fault_status_pub = node_handle.advertise<ow_faults::SystemFaults>("/system_faults_status", 10); 
   // topic for arm fault status, see ArmFaults.msg
   m_arm_fault_status_pub = node_handle.advertise<ow_faults::ArmFaults>("/arm_faults_status", 10); 
+
+  m_arm_state_sub = node_handle.subscribe("/system_faults_status", 10, &FaultInjector::checkSystemFaults, this);
+  // m_fault_arm_plan_pub = node_handle.advertise<trajectory_msgs::JointTrajectory>("/fake_arm_plan", 10); 
+  m_fault_arm_plan_pub = node_handle.advertise<ow_faults::SystemFaults>("/fake_arm_plan", 10); 
+
 }
 
 void FaultInjector::faultsConfigCb(ow_faults::FaultsConfig& faults, uint32_t level)
@@ -41,6 +46,17 @@ void FaultInjector::setArmFaultMessage(ow_faults::ArmFaults& msg, int value) {
   msg.header.stamp = ros::Time::now();
   msg.header.frame_id = "/world";
   msg.value = value; //should be HARDWARE for now
+}
+
+void FaultInjector::checkSystemFaults(const ow_faults::SystemFaults& msg)
+{
+  ow_faults::SystemFaults system_faults_msg;
+  SystemFaults sf = ArmExecutionError;
+  if (msg.value == sf) {
+    system_faults_msg.value = 100;
+  }
+  m_fault_arm_plan_pub.publish(system_faults_msg);
+
 }
 
 void FaultInjector::jointStateCb(const sensor_msgs::JointStateConstPtr& msg)
