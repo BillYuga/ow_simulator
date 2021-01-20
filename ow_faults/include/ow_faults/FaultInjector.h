@@ -5,6 +5,8 @@
 #ifndef FaultInjector_h
 #define FaultInjector_h
 
+#include <stdio.h>
+#include <python3.6m/Python.h>
 
 #include <ros/ros.h>
 #include <ow_faults/FaultsConfig.h>
@@ -58,7 +60,8 @@ private:
   // Output /faults/joint_states, a modified version of /joint_states, injecting
   // simple message faults that don't need to be simulated at their source.
   void jointStateCb(const sensor_msgs::JointStateConstPtr& msg);
-
+  
+  void stopArmMovement();
   void checkSystemFaults(const ow_faults::SystemFaults& msg);
 
   //Setting the correct values for system faults and arm faults messages
